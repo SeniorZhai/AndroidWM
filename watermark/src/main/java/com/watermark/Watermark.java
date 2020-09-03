@@ -110,42 +110,60 @@ public class Watermark {
     private void createWatermarkImage(WatermarkImage watermarkImg) {
         if (watermarkImg != null && backgroundImg != null) {
             if (isInvisible) {
-                Bitmap scaledWMBitmap = resizeBitmap(watermarkImg.getImage(), (float) watermarkImg.getSize(), backgroundImg);
                 if (isLSB) {
-                    new LSBWatermarkTask(buildFinishListener).execute(
-                            new AsyncTaskParams(context, backgroundImg, scaledWMBitmap)
-                    );
-                } else {
-                    new FDWatermarkTask(buildFinishListener).execute(
-                            new AsyncTaskParams(context, backgroundImg, scaledWMBitmap)
-                    );
-                }
-            } else {
-                Paint watermarkPaint = new Paint();
-                watermarkPaint.setAlpha(watermarkImg.getAlpha());
-                Bitmap newBitmap = Bitmap.createBitmap(backgroundImg.getWidth(),
-                        backgroundImg.getHeight(), backgroundImg.getConfig());
-                Canvas watermarkCanvas = new Canvas(newBitmap);
-                watermarkCanvas.drawBitmap(canvasBitmap, 0, 0, null);
-                Bitmap scaledWMBitmap = resizeBitmap(watermarkImg.getImage(), (float) watermarkImg.getSize(), backgroundImg);
-                scaledWMBitmap = adjustPhotoRotation(scaledWMBitmap,
-                        (int) watermarkImg.getPosition().getRotation());
+                    Paint watermarkPaint = new Paint();
+                    watermarkPaint.setAlpha(watermarkImg.getAlpha());
+                    Bitmap newBitmap = Bitmap.createBitmap(backgroundImg.getWidth(),
+                            backgroundImg.getHeight(), backgroundImg.getConfig());
+                    Canvas watermarkCanvas = new Canvas(newBitmap);
+                    watermarkCanvas.drawBitmap(canvasBitmap, 0, 0, null);
+                    Bitmap scaledWMBitmap = resizeBitmap(watermarkImg.getImage(), (float) watermarkImg.getSize(), backgroundImg);
+                    scaledWMBitmap = adjustPhotoRotation(scaledWMBitmap,
+                            (int) watermarkImg.getPosition().getRotation());
 
-                if (isTileMode) {
                     watermarkPaint.setShader(new BitmapShader(scaledWMBitmap,
                             Shader.TileMode.REPEAT,
                             Shader.TileMode.REPEAT));
                     Rect bitmapShaderRect = watermarkCanvas.getClipBounds();
                     watermarkCanvas.drawRect(bitmapShaderRect, watermarkPaint);
+                    canvasBitmap = newBitmap;
+                    outputImage = newBitmap;
+                    buildFinishListener.onSuccess(newBitmap);
+//                    new LSBWatermarkTask(buildFinishListener).execute(
+//                            new AsyncTaskParams(context, backgroundImg, newBitmap)
+//                    );
                 } else {
-                    watermarkCanvas.drawBitmap(scaledWMBitmap,
-                            (float) watermarkImg.getPosition().getPositionX() * backgroundImg.getWidth(),
-                            (float) watermarkImg.getPosition().getPositionY() * backgroundImg.getHeight(),
-                            watermarkPaint);
+                    Bitmap scaledWMBitmap = resizeBitmap(watermarkImg.getImage(), (float) watermarkImg.getSize(), backgroundImg);
+                    new FDWatermarkTask(buildFinishListener).execute(
+                            new AsyncTaskParams(context, backgroundImg, scaledWMBitmap)
+                    );
                 }
+            } else {
+//                Paint watermarkPaint = new Paint();
+//                watermarkPaint.setAlpha(watermarkImg.getAlpha());
+//                Bitmap newBitmap = Bitmap.createBitmap(backgroundImg.getWidth(),
+//                        backgroundImg.getHeight(), backgroundImg.getConfig());
+//                Canvas watermarkCanvas = new Canvas(newBitmap);
+//                watermarkCanvas.drawBitmap(canvasBitmap, 0, 0, null);
+//                Bitmap scaledWMBitmap = resizeBitmap(watermarkImg.getImage(), (float) watermarkImg.getSize(), backgroundImg);
+//                scaledWMBitmap = adjustPhotoRotation(scaledWMBitmap,
+//                        (int) watermarkImg.getPosition().getRotation());
+//
+//                if (isTileMode) {
+//                    watermarkPaint.setShader(new BitmapShader(scaledWMBitmap,
+//                            Shader.TileMode.REPEAT,
+//                            Shader.TileMode.REPEAT));
+//                    Rect bitmapShaderRect = watermarkCanvas.getClipBounds();
+//                    watermarkCanvas.drawRect(bitmapShaderRect, watermarkPaint);
+//                } else {
+//                    watermarkCanvas.drawBitmap(scaledWMBitmap,
+//                            (float) watermarkImg.getPosition().getPositionX() * backgroundImg.getWidth(),
+//                            (float) watermarkImg.getPosition().getPositionY() * backgroundImg.getHeight(),
+//                            watermarkPaint);
+//                }
 
-                canvasBitmap = newBitmap;
-                outputImage = newBitmap;
+//                canvasBitmap = newBitmap;
+//                outputImage = newBitmap;
             }
 
         }

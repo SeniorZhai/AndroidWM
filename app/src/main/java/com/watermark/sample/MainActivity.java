@@ -16,9 +16,7 @@
  */
 package com.watermark.sample;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
+import android.graphics.*;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -32,6 +30,8 @@ import com.watermark.bean.WatermarkText;
 import com.watermark.listener.BuildFinishListener;
 import com.watermark.listener.DetectFinishListener;
 import com.watermark.task.DetectionReturnValue;
+
+import static com.watermark.utils.BitmapUtils.resizeBitmap;
 //import com.watermark.androidwm.utils.BitmapUtils;
 
 /**
@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView backgroundView;
     private ImageView watermarkView;
     private Bitmap watermarkBitmap;
+    private Bitmap backgroundBitmap;
 
     private EditText editText;
 
@@ -83,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
 
         watermarkBitmap = BitmapFactory.decodeResource(getResources(),
                 R.drawable.test_watermark);
+        backgroundBitmap = BitmapFactory.decodeResource(getResources(),
+                R.drawable.test);
 
         watermarkView.setVisibility(View.GONE);
     }
@@ -128,9 +131,31 @@ public class MainActivity extends AppCompatActivity {
         // The sample method of adding an invisible image watermark.
         btnAddInVisibleImage.setOnClickListener((View v) -> {
             progressBar.setVisibility(View.VISIBLE);
+            WatermarkImage watermarkImage = new WatermarkImage(watermarkBitmap)
+                    .setImageAlpha(10)
+                    .setPositionX(Math.random())
+                    .setPositionY(Math.random())
+                    .setRotation(15)
+                    .setSize(0.5);
+            Paint watermarkPaint = new Paint();
+            watermarkPaint.setAlpha(watermarkImage.getAlpha());
+            Bitmap newBitmap = Bitmap.createBitmap(backgroundBitmap.getWidth(),
+                    backgroundBitmap.getHeight(), backgroundBitmap.getConfig());
+            Bitmap canvasBitmap = backgroundBitmap;
+            Canvas watermarkCanvas = new Canvas(newBitmap);
+//            watermarkCanvas.drawBitmap(canvasBitmap, 0, 0, null);
+            Bitmap scaledWMBitmap = resizeBitmap(watermarkImage.getImage(), (float) watermarkImage.getSize(), backgroundBitmap);
+            scaledWMBitmap = adjustPhotoRotation(scaledWMBitmap,
+                    (int) watermarkImage.getPosition().getRotation());
+
+            watermarkPaint.setShader(new BitmapShader(scaledWMBitmap,
+                    Shader.TileMode.REPEAT,
+                    Shader.TileMode.REPEAT));
+            Rect bitmapShaderRect = watermarkCanvas.getClipBounds();
+            watermarkCanvas.drawRect(bitmapShaderRect, watermarkPaint);
             WatermarkBuilder
                     .create(this, backgroundView)
-                    .loadWatermarkImage(watermarkBitmap)
+                    .loadWatermarkImage(newBitmap)
                     .setInvisibleWMListener(true, new BuildFinishListener<Bitmap>() {
                         @Override
                         public void onSuccess(Bitmap object) {
@@ -147,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onFailure(String message) {
                             progressBar.setVisibility(View.GONE);
-                            Log.e("@@@",message);
+                            Log.e("@@@", message);
                         }
                     });
         });
@@ -173,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onFailure(String message) {
                             progressBar.setVisibility(View.GONE);
-                            Log.e("@@@",message);
+                            Log.e("@@@", message);
                         }
                     });
         });
@@ -195,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onFailure(String message) {
                             progressBar.setVisibility(View.GONE);
-                            Log.e("@@@",message);
+                            Log.e("@@@", message);
                         }
                     });
         });
@@ -219,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onFailure(String message) {
                             progressBar.setVisibility(View.GONE);
-                            Log.e("@@@",message);
+                            Log.e("@@@", message);
                         }
                     });
         });
@@ -231,5 +256,13 @@ public class MainActivity extends AppCompatActivity {
             watermarkView.setVisibility(View.GONE);
         });
 
+    }
+
+    private Bitmap adjustPhotoRotation(Bitmap bitmap, final int orientationAngle) {
+        Matrix matrix = new Matrix();
+        matrix.setRotate(orientationAngle,
+                (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
+        return Bitmap.createBitmap(bitmap,
+                0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 }
