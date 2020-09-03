@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">androidWM</string>
+    <string name="btn_add_text">create text</string>
+    <string name="btn_add_image">create image</string>
+    <string name="btn_add_invisible_image">invisible image</string>
+    <string name="btn_add_invisible_text">invisible text</string>
+    <string name="btn_detect_image">detect image</string>
+    <string name="btn_detect_text">detect text</string>
+    <string name="btn_clear_watermark">Clear watermarks</string>
+    <string name="btn_load_marked">Load picture</string>
+    <string name="et_hint">Add a text for invisible watermark</string>
+</resources>
