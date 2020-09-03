@@ -32,17 +32,20 @@ public class AsyncTaskParams {
     private Context context;
 
     public AsyncTaskParams(Context context, Bitmap backgroundImg, WatermarkText watermarkText, Bitmap watermarkImg) {
+        this.context = context;
         this.backgroundImg = backgroundImg;
         this.watermarkText = watermarkText;
         this.watermarkImg = watermarkImg;
     }
 
     public AsyncTaskParams(Context context, Bitmap backgroundImg, Bitmap watermarkImg) {
+        this.context = context;
         this.backgroundImg = backgroundImg;
         this.watermarkImg = watermarkImg;
     }
 
     public AsyncTaskParams(Context context, Bitmap backgroundImg, WatermarkText watermarkText) {
+        this.context = context;
         this.backgroundImg = backgroundImg;
         this.watermarkText = watermarkText;
     }
